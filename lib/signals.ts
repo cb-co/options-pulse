@@ -87,10 +87,10 @@ export function computeSignals(
     for (const c of contracts) {
       const prev = prevMap.get(c.symbol)
       if (!prev) continue
-      if (prev.volume && c.volume) {
+      if (prev.volume != null && c.volume != null && prev.volume !== 0) {
         volumeChange[c.symbol] = (c.volume - prev.volume) / prev.volume
       }
-      if (prev.openInterest && c.openInterest) {
+      if (prev.openInterest != null && c.openInterest != null && prev.openInterest !== 0) {
         oiChange[c.symbol] = (c.openInterest - prev.openInterest) / prev.openInterest
       }
       if (prev.impliedVolatility != null && c.impliedVolatility != null) {
