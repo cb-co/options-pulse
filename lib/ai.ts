@@ -1,7 +1,6 @@
 // lib/ai.ts
 import { generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
-import { openai } from '@ai-sdk/openai'
 import { google } from '@ai-sdk/google'
 import type { SignalData } from '@/types/market'
 
@@ -12,8 +11,6 @@ function getModel() {
   const modelId = process.env.AI_MODEL ?? 'claude-sonnet-4-6'
 
   switch (provider) {
-    case 'openai':
-      return openai(modelId)
     case 'google':
       return google(modelId)
     case 'anthropic':
