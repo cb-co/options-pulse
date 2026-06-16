@@ -95,7 +95,7 @@ Vercel Cron config in `vercel.json`: `"0 21 * * 1-5"` (21:00 UTC, weekdays only 
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
 # AI — swap provider and model without touching code

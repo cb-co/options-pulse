@@ -118,7 +118,7 @@ In `package.json`, add to `"scripts"`:
 ```bash
 # .env.local
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
@@ -339,7 +339,7 @@ import type { Database } from '@/types/supabase'
 export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   )
 }
 ```
@@ -356,7 +356,7 @@ export function createClient() {
   const cookieStore = cookies()
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() { return cookieStore.getAll() },
@@ -1140,7 +1140,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() { return request.cookies.getAll() },

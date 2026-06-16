@@ -60,6 +60,8 @@ alter table digests enable row level security;
 -- profiles: own row only
 create policy "Users can read own profile"
   on profiles for select using (auth.uid() = id);
+create policy "Users can insert own profile"
+  on profiles for insert with check (auth.uid() = id);
 create policy "Users can update own profile"
   on profiles for update using (auth.uid() = id);
 
@@ -71,8 +73,8 @@ create policy "Users can insert own watchlist"
 create policy "Users can delete own watchlist"
   on watchlist_items for delete using (auth.uid() = user_id);
 
--- option_snapshots and digests: public read, service-role write
+-- option_snapshots and digests: public read (anon + authenticated), service-role write only
 create policy "Public read option_snapshots"
-  on option_snapshots for select to anon using (true);
+  on option_snapshots for select using (true);
 create policy "Public read digests"
-  on digests for select to anon using (true);
+  on digests for select using (true);
