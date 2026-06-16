@@ -39,7 +39,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      digests: {
+        Row: {
+          created_at: string | null
+          digest_date: string
+          id: string
+          narrative: string | null
+          signals: Json | null
+          ticker: string
+          unusualness_score: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          digest_date: string
+          id?: string
+          narrative?: string | null
+          signals?: Json | null
+          ticker: string
+          unusualness_score?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          digest_date?: string
+          id?: string
+          narrative?: string | null
+          signals?: Json | null
+          ticker?: string
+          unusualness_score?: number | null
+        }
+        Relationships: []
+      }
+      option_snapshots: {
+        Row: {
+          contract_symbol: string
+          created_at: string | null
+          expiration: string
+          id: string
+          implied_volatility: number | null
+          last_price: number | null
+          open_interest: number | null
+          option_type: string
+          snapshot_date: string
+          strike: number
+          ticker: string
+          volume: number | null
+        }
+        Insert: {
+          contract_symbol: string
+          created_at?: string | null
+          expiration: string
+          id?: string
+          implied_volatility?: number | null
+          last_price?: number | null
+          open_interest?: number | null
+          option_type: string
+          snapshot_date: string
+          strike: number
+          ticker: string
+          volume?: number | null
+        }
+        Update: {
+          contract_symbol?: string
+          created_at?: string | null
+          expiration?: string
+          id?: string
+          implied_volatility?: number | null
+          last_price?: number | null
+          open_interest?: number | null
+          option_type?: string
+          snapshot_date?: string
+          strike?: number
+          ticker?: string
+          volume?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+        }
+        Relationships: []
+      }
+      watchlist_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          ticker: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ticker: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ticker?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

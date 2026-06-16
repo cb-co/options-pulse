@@ -5,6 +5,7 @@ import { generateNarrative } from '@/lib/ai'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FIXED_UNIVERSE } from '@/constants/tickers'
 import type { ContractData } from '@/types/market'
+import type { Json } from '@/types/supabase'
 
 const DELAY_MS = process.env.NODE_ENV === 'test' ? 0 : 400
 
@@ -31,7 +32,7 @@ export async function runDailyPipeline(
   let prevSnapshots: unknown[] | null = null
   try {
     const prevResult = await Promise.race<{ data: unknown[] | null; error: unknown }>([
-      supabase.from('option_snapshots').select('*').eq('snapshot_date', yesterdayStr) as Promise<{ data: unknown[] | null; error: unknown }>,
+      supabase.from('option_snapshots').select('*').eq('snapshot_date', yesterdayStr) as unknown as Promise<{ data: unknown[] | null; error: unknown }>,
       new Promise<{ data: null; error: string }>(resolve =>
         setTimeout(() => resolve({ data: null, error: 'timeout' }), 2000)
       ),
@@ -67,13 +68,14 @@ export async function runDailyPipeline(
         .upsert(rows, { onConflict: 'snapshot_date,contract_symbol' })
 
       // Map prior-day DB rows back to ContractData shape for day-2 signals
-      const tickerPrev: ContractData[] = (prevSnapshots ?? [])
-        .filter((s: { ticker: string }) => s.ticker === ticker)
-        .map((s: {
-          contract_symbol: string; expiration: string; strike: string | number;
-          option_type: string; volume: number | null; open_interest: number | null;
-          implied_volatility: string | number | null; last_price: string | number | null
-        }) => ({
+      type SnapshotRow = {
+        ticker: string; contract_symbol: string; expiration: string; strike: string | number;
+        option_type: string; volume: number | null; open_interest: number | null;
+        implied_volatility: string | number | null; last_price: string | number | null
+      }
+      const tickerPrev: ContractData[] = ((prevSnapshots ?? []) as SnapshotRow[])
+        .filter(s => s.ticker === ticker)
+        .map(s => ({
           symbol: s.contract_symbol,
           expiration: new Date(s.expiration),
           strike: Number(s.strike),
@@ -95,7 +97,7 @@ export async function runDailyPipeline(
       const narrative = await generateNarrative(ticker, signals)
 
       await supabase.from('digests').upsert(
-        { digest_date: dateStr, ticker, unusualness_score: unusualnessScore, signals, narrative },
+        { digest_date: dateStr, ticker, unusualness_score: unusualnessScore, signals: signals as unknown as Json, narrative },
         { onConflict: 'digest_date,ticker' }
       )
 

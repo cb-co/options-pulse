@@ -12,10 +12,9 @@ export default function WatchlistPage() {
   const [newTicker, setNewTicker] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
   useEffect(() => {
     async function load() {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -45,6 +44,7 @@ export default function WatchlistPage() {
       return
     }
 
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -63,6 +63,7 @@ export default function WatchlistPage() {
   }
 
   async function removeTicker(id: string) {
+    const supabase = createClient()
     await supabase.from('watchlist_items').delete().eq('id', id)
     setItems(prev => prev.filter(i => i.id !== id))
   }

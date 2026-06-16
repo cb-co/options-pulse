@@ -7,10 +7,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${location.origin}/auth/callback` },
