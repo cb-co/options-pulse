@@ -27,7 +27,7 @@ export default function LoginPage() {
           <div
             style={{
               width: 48, height: 48, borderRadius: '50%',
-              background: 'var(--amber-dim)', border: '1px solid rgba(245,158,11,0.25)',
+              background: 'var(--amber-dim)', border: '1px solid rgba(196,151,58,0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 20px', fontSize: 20,
             }}

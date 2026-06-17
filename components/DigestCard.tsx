@@ -35,20 +35,20 @@ function heatStyles(heat: ReturnType<typeof scoreHeat>, isCompact: boolean) {
   switch (heat) {
     case 'fire': return {
       ...base,
-      background: 'linear-gradient(150deg, rgba(245,158,11,0.08) 0%, var(--surface) 45%)',
-      border: '1px solid rgba(245,158,11,0.45)',
-      boxShadow: '0 0 32px rgba(245,158,11,0.12), 0 0 8px rgba(245,158,11,0.06), 0 4px 16px rgba(0,0,0,0.5)',
+      background: 'linear-gradient(150deg, rgba(196,151,58,0.08) 0%, var(--surface) 45%)',
+      border: '1px solid rgba(196,151,58,0.45)',
+      boxShadow: '0 0 32px rgba(196,151,58,0.12), 0 0 8px rgba(196,151,58,0.06), 0 4px 16px rgba(0,0,0,0.5)',
     }
     case 'hot': return {
       ...base,
-      background: 'linear-gradient(150deg, rgba(245,158,11,0.04) 0%, var(--surface) 50%)',
-      border: '1px solid rgba(245,158,11,0.25)',
-      boxShadow: '0 0 16px rgba(245,158,11,0.07), 0 4px 12px rgba(0,0,0,0.4)',
+      background: 'linear-gradient(150deg, rgba(196,151,58,0.04) 0%, var(--surface) 50%)',
+      border: '1px solid rgba(196,151,58,0.25)',
+      boxShadow: '0 0 16px rgba(196,151,58,0.07), 0 4px 12px rgba(0,0,0,0.4)',
     }
     case 'warm': return {
       ...base,
       background: 'var(--surface)',
-      border: '1px solid rgba(245,158,11,0.12)',
+      border: '1px solid rgba(196,151,58,0.12)',
       boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
     }
     default: return {
@@ -73,15 +73,15 @@ function scoreGlowStyle(heat: ReturnType<typeof scoreHeat>, fontSize: string) {
   switch (heat) {
     case 'fire': return {
       ...base,
-      textShadow: '0 0 48px rgba(245,158,11,0.6), 0 0 16px rgba(245,158,11,0.3), 0 0 4px rgba(245,158,11,0.2)',
+      textShadow: '0 0 48px rgba(196,151,58,0.6), 0 0 16px rgba(196,151,58,0.3), 0 0 4px rgba(196,151,58,0.2)',
     }
     case 'hot': return {
       ...base,
-      textShadow: '0 0 28px rgba(245,158,11,0.4), 0 0 10px rgba(245,158,11,0.15)',
+      textShadow: '0 0 28px rgba(196,151,58,0.4), 0 0 10px rgba(196,151,58,0.15)',
     }
     default: return {
       ...base,
-      textShadow: '0 0 20px rgba(245,158,11,0.2), 0 0 6px rgba(245,158,11,0.08)',
+      textShadow: '0 0 20px rgba(196,151,58,0.2), 0 0 6px rgba(196,151,58,0.08)',
     }
   }
 }

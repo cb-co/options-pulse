@@ -106,8 +106,8 @@ export default function WatchlistPage() {
           <div
             style={{
               padding: '12px 16px', borderRadius: 6,
-              border: '1px solid rgba(245,158,11,0.2)',
-              background: 'rgba(245,158,11,0.05)',
+              border: '1px solid rgba(196,151,58,0.2)',
+              background: 'rgba(196,151,58,0.05)',
               fontSize: 12, color: 'var(--text-2)',
               marginBottom: 24, lineHeight: 1.5,
             }}

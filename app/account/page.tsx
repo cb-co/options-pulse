@@ -96,8 +96,8 @@ export default async function AccountPage() {
           <div
             style={{
               padding: '20px 24px', borderRadius: 8,
-              border: '1px solid rgba(245,158,11,0.18)',
-              background: 'rgba(245,158,11,0.04)',
+              border: '1px solid rgba(196,151,58,0.18)',
+              background: 'rgba(196,151,58,0.04)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap',
             }}
           >

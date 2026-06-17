@@ -10,9 +10,9 @@
   --text-1: #EDF2F7;
   --text-2: #6B7FA0;
   --text-3: #3D4E65;
-  --amber: #F59E0B;
-  --amber-glow: rgba(245, 158, 11, 0.18);
-  --amber-dim: rgba(245, 158, 11, 0.07);
+  --amber: #C4973A;
+  --amber-glow: rgba(196, 151, 58, 0.2);
+  --amber-dim: rgba(196, 151, 58, 0.07);
   --green: #10D9A0;
   --green-dim: rgba(16, 217, 160, 0.07);
   --red: #F0556A;
@@ -36,7 +36,7 @@ body {
   color: var(--text-1);
   font-family: 'Inter', system-ui, sans-serif;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(78,142,217,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,151,58,0.06) 0%, transparent 70%),
     radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px);
   background-size: 100% 100%, 28px 28px;
   min-height: 100vh;
@@ -47,7 +47,7 @@ body {
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-weight: 700;
   color: var(--amber);
-  text-shadow: 0 0 32px var(--amber-glow), 0 0 8px rgba(245,158,11,0.1);
+  text-shadow: 0 0 32px var(--amber-glow), 0 0 8px rgba(196,151,58,0.1);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
 }
@@ -61,8 +61,8 @@ body {
 
 /* ── Pulse animation for nav indicator ── */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
-  60%       { opacity: 0.85; box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196,151,58,0.5); }
+  60%       { opacity: 0.85; box-shadow: 0 0 0 5px rgba(196,151,58,0); }
 }
 .pulse-dot {
   animation: pulse-dot 2.8s ease-in-out infinite;
@@ -94,7 +94,7 @@ body {
 }
 .chip-bear   { color: var(--red);   background: var(--red-dim);   border-color: rgba(240,85,106,0.22); }
 .chip-bull   { color: var(--green); background: var(--green-dim); border-color: rgba(16,217,160,0.2);  }
-.chip-amber  { color: var(--amber); background: var(--amber-dim); border-color: rgba(245,158,11,0.22); }
+.chip-amber  { color: var(--amber); background: var(--amber-dim); border-color: rgba(196,151,58,0.22); }
 .chip-neutral{ color: var(--text-2);background: rgba(107,127,160,0.06); border-color: var(--border); }
 
 /* ── Inputs ── */
@@ -112,7 +112,7 @@ body {
 .input-dark::placeholder { color: var(--text-3); }
 .input-dark:focus {
   border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+  box-shadow: 0 0 0 3px rgba(196,151,58,0.08);
 }
 .input-dark:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -155,15 +155,15 @@ body {
   font-size: 14px;
   padding: 10px 20px;
   border-radius: 6px;
-  border: 1px solid rgba(245,158,11,0.35);
+  border: 1px solid rgba(196,151,58,0.35);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
   font-family: inherit;
 }
 .btn-outline-amber:hover {
-  background: rgba(245,158,11,0.08);
-  border-color: rgba(245,158,11,0.6);
+  background: rgba(196,151,58,0.08);
+  border-color: rgba(196,151,58,0.6);
 }
 
 /* ── Scrollbar ── */

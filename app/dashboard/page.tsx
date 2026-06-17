@@ -115,8 +115,8 @@ export default async function DashboardPage() {
           <div
             style={{
               marginTop: 24, padding: '16px 20px', borderRadius: 8,
-              border: '1px solid rgba(245,158,11,0.18)',
-              background: 'rgba(245,158,11,0.04)',
+              border: '1px solid rgba(196,151,58,0.18)',
+              background: 'rgba(196,151,58,0.04)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap',
             }}
           >

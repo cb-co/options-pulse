@@ -4,10 +4,9 @@ import { Nav } from '@/components/Nav'
 import { DigestCard } from '@/components/DigestCard'
 import type { SignalData } from '@/types/market'
 
-export const revalidate = 3600
-
 export default async function LandingPage() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const today = new Date().toISOString().split('T')[0]
 
   const { data: topDigests } = await supabase
@@ -42,8 +41,8 @@ export default async function LandingPage() {
                     fontWeight: 700, fontSize: 80, lineHeight: 1,
                     letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums',
                     color: 'var(--amber)',
-                    textShadow: '0 0 80px rgba(245,158,11,0.55), 0 0 30px rgba(245,158,11,0.3), 0 0 8px rgba(245,158,11,0.2)',
-                    filter: 'drop-shadow(0 0 40px rgba(245,158,11,0.15))',
+                    textShadow: '0 0 80px rgba(196,151,58,0.55), 0 0 30px rgba(196,151,58,0.3), 0 0 8px rgba(196,151,58,0.2)',
+                    filter: 'drop-shadow(0 0 40px rgba(196,151,58,0.15))',
                   }}
                 >
                   {Number(hero.unusualness_score) >= 1000
@@ -87,7 +86,7 @@ export default async function LandingPage() {
                 View all movers →
               </button>
             </Link>
-            <Link href="/login" style={{ textDecoration: 'none' }}>
+            <Link href={user ? '/dashboard' : '/login'} style={{ textDecoration: 'none' }}>
               <button className="btn-ghost" style={{ fontSize: 14 }}>
                 Track your tickers
               </button>

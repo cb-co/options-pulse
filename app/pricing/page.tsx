@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import { Nav } from '@/components/Nav'
 
 const features = [
@@ -10,7 +11,19 @@ const features = [
   { free: false, paid: true,  label: '30-day digest history' },
 ]
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let subscriptionStatus: string | null = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles').select('subscription_status').eq('id', user.id).single()
+    subscriptionStatus = profile?.subscription_status ?? 'free'
+  }
+
+  const isActive = subscriptionStatus === 'active'
+
   return (
     <>
       <Nav />
@@ -37,7 +50,6 @@ export default function PricingPage() {
             overflow: 'hidden', marginBottom: 32,
           }}
         >
-          {/* Table header */}
           <div
             style={{
               display: 'grid', gridTemplateColumns: '1fr 120px 160px',
@@ -84,8 +96,10 @@ export default function PricingPage() {
           style={{
             padding: '32px',
             borderRadius: 10,
-            border: '1px solid rgba(245,158,11,0.2)',
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.04) 0%, transparent 60%)',
+            border: isActive ? '1px solid rgba(16,217,160,0.2)' : '1px solid rgba(196,151,58,0.2)',
+            background: isActive
+              ? 'linear-gradient(135deg, rgba(16,217,160,0.04) 0%, transparent 60%)'
+              : 'linear-gradient(135deg, rgba(196,151,58,0.04) 0%, transparent 60%)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -94,28 +108,53 @@ export default function PricingPage() {
           }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-              <span
-                className="score-glow"
-                style={{ fontSize: 40, lineHeight: 1 }}
-              >
-                $9
-              </span>
-              <span style={{ fontSize: 14, color: 'var(--text-3)' }}>/month</span>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>
-              Cancel anytime. No contracts.
-            </p>
+            {isActive ? (
+              <>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--green)', marginBottom: 4 }}>
+                  ✓ You&apos;re on Pro
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>
+                  All features unlocked.
+                </p>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+                  <span className="score-glow" style={{ fontSize: 40, lineHeight: 1 }}>$9</span>
+                  <span style={{ fontSize: 14, color: 'var(--text-3)' }}>/month</span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>
+                  Cancel anytime. No contracts.
+                </p>
+              </>
+            )}
           </div>
+
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <Link href="/login" style={{ textDecoration: 'none' }}>
-              <button className="btn-ghost" style={{ fontSize: 13 }}>Sign in first</button>
-            </Link>
-            <form action="/api/stripe/checkout" method="POST">
-              <button type="submit" className="btn-primary" style={{ fontSize: 15, padding: '12px 28px' }}>
-                Subscribe to Pro
-              </button>
-            </form>
+            {isActive ? (
+              <form action="/api/stripe/portal" method="POST">
+                <button type="submit" className="btn-ghost" style={{ fontSize: 13 }}>
+                  Manage subscription →
+                </button>
+              </form>
+            ) : user ? (
+              <form action="/api/stripe/checkout" method="POST">
+                <button type="submit" className="btn-primary" style={{ fontSize: 15, padding: '12px 28px' }}>
+                  Subscribe to Pro
+                </button>
+              </form>
+            ) : (
+              <>
+                <Link href="/login" style={{ textDecoration: 'none' }}>
+                  <button className="btn-ghost" style={{ fontSize: 13 }}>Sign in first</button>
+                </Link>
+                <Link href="/login" style={{ textDecoration: 'none' }}>
+                  <button className="btn-primary" style={{ fontSize: 15, padding: '12px 28px' }}>
+                    Subscribe to Pro
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </main>
