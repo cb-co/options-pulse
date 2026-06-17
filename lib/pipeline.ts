@@ -14,15 +14,21 @@ function sleep(ms: number) {
 }
 
 export async function runDailyPipeline(
-  date: Date
+  date: Date,
+  onlyTickers?: string[]
 ): Promise<{ processed: string[]; failed: string[] }> {
   const supabase = createAdminClient()
   const dateStr = date.toISOString().split('T')[0]
 
-  // Build full ticker list: fixed universe + any user watchlist tickers
-  const { data: watchlistItems } = await supabase.from('watchlist_items').select('ticker')
-  const watchlistTickers = [...new Set((watchlistItems ?? []).map((w: { ticker: string }) => w.ticker))]
-  const tickers = [...new Set([...FIXED_UNIVERSE, ...watchlistTickers])]
+  let tickers: string[]
+  if (onlyTickers?.length) {
+    tickers = onlyTickers.map(t => t.toUpperCase())
+  } else {
+    // Build full ticker list: fixed universe + any user watchlist tickers
+    const { data: watchlistItems } = await supabase.from('watchlist_items').select('ticker')
+    const watchlistTickers = [...new Set((watchlistItems ?? []).map((w: { ticker: string }) => w.ticker))]
+    tickers = [...new Set([...FIXED_UNIVERSE, ...watchlistTickers])]
+  }
 
   // Load yesterday's snapshots for day-2 signals
   const yesterday = new Date(date)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -15,38 +16,90 @@ export default function LoginPage() {
       email,
       options: { emailRedirectTo: `${location.origin}/auth/callback` },
     })
-    if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
-    }
+    if (error) setError(error.message)
+    else setSent(true)
   }
 
   if (sent) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-center text-lg">Check your email for a sign-in link.</p>
-      </main>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ textAlign: 'center', maxWidth: 360 }}>
+          <div
+            style={{
+              width: 48, height: 48, borderRadius: '50%',
+              background: 'var(--amber-dim)', border: '1px solid rgba(245,158,11,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 20px', fontSize: 20,
+            }}
+          >
+            ✉
+          </div>
+          <h2 style={{ fontFamily: "'Space Grotesk', system-ui", fontWeight: 700, fontSize: 22, marginBottom: 10, color: 'var(--text-1)' }}>
+            Check your inbox
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>
+            We sent a sign-in link to <strong style={{ color: 'var(--text-1)' }}>{email}</strong>.
+            Click it to access your dashboard.
+          </p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm px-4">
-        <h1 className="text-2xl font-bold">Sign in to OptionPulse</h1>
-        <input
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          className="border rounded px-3 py-2"
-        />
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button type="submit" className="bg-black text-white rounded px-4 py-2">
-          Send magic link
-        </button>
-      </form>
-    </main>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Minimal header */}
+      <header style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+        <Link
+          href="/"
+          style={{
+            fontFamily: "'Space Grotesk', system-ui", fontWeight: 700, fontSize: 15,
+            color: 'var(--text-1)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--amber)', display: 'block' }} />
+          OptionPulse
+        </Link>
+      </header>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ width: '100%', maxWidth: 360 }}>
+          <h1
+            style={{
+              fontFamily: "'Space Grotesk', system-ui", fontWeight: 700,
+              fontSize: 26, letterSpacing: '-0.02em', marginBottom: 8, color: 'var(--text-1)',
+            }}
+          >
+            Sign in
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 28, lineHeight: 1.5 }}>
+            Enter your email to receive a sign-in link. No password required.
+          </p>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input
+              className="input-dark"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+            {error && (
+              <p style={{ fontSize: 12, color: 'var(--red)', margin: 0 }}>{error}</p>
+            )}
+            <button type="submit" className="btn-primary" style={{ width: '100%' }}>
+              Send sign-in link
+            </button>
+          </form>
+
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 24, lineHeight: 1.5 }}>
+            By continuing you agree that OptionPulse provides informational summaries only,
+            not investment advice.
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

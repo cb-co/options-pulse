@@ -7,8 +7,12 @@ async function handle(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { searchParams } = new URL(req.url)
+  const ticker = searchParams.get('ticker')
+  const onlyTickers = ticker ? ticker.split(',').map(t => t.trim()) : undefined
+
   const date = new Date()
-  const result = await runDailyPipeline(date)
+  const result = await runDailyPipeline(date, onlyTickers)
 
   return NextResponse.json({
     ok: true,

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Disclaimer } from '@/components/Disclaimer'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' })
 
 export const metadata: Metadata = {
   title: 'OptionPulse',
@@ -12,11 +13,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body>
         {children}
-        <footer className="border-t mt-16 py-8 px-4 max-w-4xl mx-auto">
-          <Disclaimer />
+        <footer style={{ borderTop: '1px solid var(--border)', marginTop: 80, padding: '32px 24px' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <Disclaimer />
+          </div>
         </footer>
       </body>
     </html>
