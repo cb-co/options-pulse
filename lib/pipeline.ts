@@ -46,14 +46,15 @@ export async function runDailyPipeline(
         last_price: c.lastPrice,
       }))
 
-      await supabase
+      const { error: snapErr } = await supabase
         .from('option_snapshots')
         .upsert(rows, { onConflict: 'snapshot_date,contract_symbol' })
+      if (snapErr) throw new Error(`option_snapshots upsert: ${snapErr.message}`)
 
       const gexData = computeGex(ticker, chain.contracts, chain.underlyingPrice, date)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any).from('gex_snapshots').upsert(
+      const { error: gexErr } = await (supabase as any).from('gex_snapshots').upsert(
         {
           snapshot_date: dateStr,
           ticker,
@@ -70,6 +71,7 @@ export async function runDailyPipeline(
         },
         { onConflict: 'snapshot_date,ticker' }
       )
+      if (gexErr) throw new Error(`gex_snapshots upsert: ${gexErr.message}`)
 
       processed.push(ticker)
     } catch (err) {
