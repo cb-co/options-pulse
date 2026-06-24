@@ -106,14 +106,14 @@ export default function WatchlistPage() {
           <div
             style={{
               padding: '12px 16px', borderRadius: 6,
-              border: '1px solid rgba(196,151,58,0.2)',
-              background: 'rgba(196,151,58,0.05)',
+              border: '1px solid rgba(34,211,238,0.18)',
+              background: 'rgba(34,211,238,0.04)',
               fontSize: 12, color: 'var(--text-2)',
               marginBottom: 24, lineHeight: 1.5,
             }}
           >
             Free plan tracks 1 ticker.{' '}
-            <Link href="/pricing" style={{ color: 'var(--amber)', textDecoration: 'none' }}>
+            <Link href="/pricing" style={{ color: 'var(--cyan)', textDecoration: 'none' }}>
               Upgrade to Pro
             </Link>{' '}
             for unlimited.

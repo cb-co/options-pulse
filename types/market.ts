@@ -1,4 +1,3 @@
-// types/market.ts
 export interface ContractData {
   symbol: string
   expiration: Date
@@ -9,6 +8,7 @@ export interface ContractData {
   impliedVolatility: number | null
   lastPrice: number | null
   underlyingPrice: number
+  gamma?: number
 }
 
 export interface OptionChainData {
@@ -29,4 +29,25 @@ export interface SignalData {
   volumeChange?: Record<string, number>
   oiChange?: Record<string, number>
   ivChange?: Record<string, number>
+}
+
+export interface GexByStrike {
+  strike: number
+  callGex: number
+  putGex: number
+  netGex: number
+}
+
+export interface GexData {
+  ticker: string
+  underlyingPrice: number
+  netGex: number
+  absGex: number
+  regime: 'positive' | 'negative'
+  callWall: number | null
+  putWall: number | null
+  zeroGamma: number | null
+  byStrike: GexByStrike[]
+  putCallRatio: number | null
+  ivSkew: number | null
 }

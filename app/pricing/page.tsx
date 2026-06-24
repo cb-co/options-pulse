@@ -3,12 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Nav } from '@/components/Nav'
 
 const features = [
-  { free: true,  paid: true,  label: "Today's Top Movers feed" },
-  { free: true,  paid: true,  label: 'Signal chips (P/C, vol/OI, IV skew)' },
-  { free: true,  paid: true,  label: 'AI narrative summaries' },
-  { free: '1',   paid: '∞',   label: 'Watchlist tickers' },
-  { free: false, paid: true,  label: 'Daily digest for watchlist' },
-  { free: false, paid: true,  label: '30-day digest history' },
+  { free: true,  paid: true,      label: "Today's market overview (all tickers)" },
+  { free: true,  paid: true,      label: 'GEX profile chart' },
+  { free: true,  paid: true,      label: 'Key levels (Call Wall, Put Wall, Zero Gamma)' },
+  { free: 'SPY/QQQ/IWM', paid: '18+', label: 'Tickers with full GEX detail' },
+  { free: false, paid: true,      label: 'Custom watchlist' },
+  { free: false, paid: true,      label: '30-day GEX history' },
 ]
 
 export default async function PricingPage() {
@@ -31,7 +31,7 @@ export default async function PricingPage() {
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <h1
             style={{
-              fontFamily: "'Space Grotesk', system-ui",
+              fontFamily: 'var(--font-space), system-ui',
               fontWeight: 700, fontSize: 40, letterSpacing: '-0.03em',
               color: 'var(--text-1)', marginBottom: 12,
             }}
@@ -61,7 +61,7 @@ export default async function PricingPage() {
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', textAlign: 'center' }}>
               Free
             </div>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--amber)', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--cyan)', textAlign: 'center' }}>
               Pro
             </div>
           </div>
@@ -85,7 +85,7 @@ export default async function PricingPage() {
               <div style={{ textAlign: 'center' }}>
                 {f.paid === true  ? <span style={{ color: 'var(--green)', fontSize: 15 }}>✓</span>
                 : f.paid === false ? <span style={{ color: 'var(--text-3)', fontSize: 15 }}>—</span>
-                : <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--amber)' }}>{f.paid}</span>}
+                : <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--cyan)' }}>{f.paid}</span>}
               </div>
             </div>
           ))}
@@ -96,10 +96,10 @@ export default async function PricingPage() {
           style={{
             padding: '32px',
             borderRadius: 10,
-            border: isActive ? '1px solid rgba(16,217,160,0.2)' : '1px solid rgba(196,151,58,0.2)',
+            border: isActive ? '1px solid rgba(16,217,160,0.2)' : '1px solid rgba(34,211,238,0.2)',
             background: isActive
               ? 'linear-gradient(135deg, rgba(16,217,160,0.04) 0%, transparent 60%)'
-              : 'linear-gradient(135deg, rgba(196,151,58,0.04) 0%, transparent 60%)',
+              : 'linear-gradient(135deg, rgba(34,211,238,0.04) 0%, transparent 60%)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -120,7 +120,7 @@ export default async function PricingPage() {
             ) : (
               <>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-                  <span className="score-glow" style={{ fontSize: 40, lineHeight: 1 }}>$9</span>
+                  <span className="font-mono" style={{ fontSize: 40, lineHeight: 1, fontWeight: 700, color: 'var(--text-1)' }}>$9</span>
                   <span style={{ fontSize: 14, color: 'var(--text-3)' }}>/month</span>
                 </div>
                 <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>

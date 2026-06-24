@@ -1,10 +1,7 @@
-// lib/pipeline.ts
 import { getOptionChain } from '@/lib/marketData'
-import { computeSignals, computeUnusualnesScore } from '@/lib/signals'
-import { generateNarrative } from '@/lib/ai'
+import { computeGex } from '@/lib/gex'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FIXED_UNIVERSE } from '@/constants/tickers'
-import type { ContractData } from '@/types/market'
 import type { Json } from '@/types/supabase'
 
 const DELAY_MS = process.env.NODE_ENV === 'test' ? 0 : 400
@@ -24,28 +21,9 @@ export async function runDailyPipeline(
   if (onlyTickers?.length) {
     tickers = onlyTickers.map(t => t.toUpperCase())
   } else {
-    // Build full ticker list: fixed universe + any user watchlist tickers
     const { data: watchlistItems } = await supabase.from('watchlist_items').select('ticker')
     const watchlistTickers = [...new Set((watchlistItems ?? []).map((w: { ticker: string }) => w.ticker))]
     tickers = [...new Set([...FIXED_UNIVERSE, ...watchlistTickers])]
-  }
-
-  // Load yesterday's snapshots for day-2 signals
-  const yesterday = new Date(date)
-  yesterday.setDate(yesterday.getDate() - 1)
-  const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-  let prevSnapshots: unknown[] | null = null
-  try {
-    const prevResult = await Promise.race<{ data: unknown[] | null; error: unknown }>([
-      supabase.from('option_snapshots').select('*').eq('snapshot_date', yesterdayStr) as unknown as Promise<{ data: unknown[] | null; error: unknown }>,
-      new Promise<{ data: null; error: string }>(resolve =>
-        setTimeout(() => resolve({ data: null, error: 'timeout' }), 2000)
-      ),
-    ])
-    prevSnapshots = prevResult.data
-  } catch {
-    // prevSnapshots stays null — day-2 signals will be skipped
   }
 
   const processed: string[] = []
@@ -55,7 +33,6 @@ export async function runDailyPipeline(
     try {
       const chain = await getOptionChain(ticker)
 
-      // Store raw snapshots
       const rows = chain.contracts.map(c => ({
         snapshot_date: dateStr,
         ticker,
@@ -73,38 +50,25 @@ export async function runDailyPipeline(
         .from('option_snapshots')
         .upsert(rows, { onConflict: 'snapshot_date,contract_symbol' })
 
-      // Map prior-day DB rows back to ContractData shape for day-2 signals
-      type SnapshotRow = {
-        ticker: string; contract_symbol: string; expiration: string; strike: string | number;
-        option_type: string; volume: number | null; open_interest: number | null;
-        implied_volatility: string | number | null; last_price: string | number | null
-      }
-      const tickerPrev: ContractData[] = ((prevSnapshots ?? []) as SnapshotRow[])
-        .filter(s => s.ticker === ticker)
-        .map(s => ({
-          symbol: s.contract_symbol,
-          expiration: new Date(s.expiration),
-          strike: Number(s.strike),
-          optionType: s.option_type as 'call' | 'put',
-          volume: s.volume,
-          openInterest: s.open_interest,
-          impliedVolatility: s.implied_volatility != null ? Number(s.implied_volatility) : null,
-          lastPrice: s.last_price != null ? Number(s.last_price) : null,
-          underlyingPrice: chain.underlyingPrice,
-        }))
+      const gexData = computeGex(ticker, chain.contracts, chain.underlyingPrice, date)
 
-      const signals = computeSignals(
-        chain.contracts,
-        chain.underlyingPrice,
-        tickerPrev.length ? tickerPrev : undefined
-      )
-
-      const unusualnessScore = computeUnusualnesScore(signals)
-      const narrative = await generateNarrative(ticker, signals)
-
-      await supabase.from('digests').upsert(
-        { digest_date: dateStr, ticker, unusualness_score: unusualnessScore, signals: signals as unknown as Json, narrative },
-        { onConflict: 'digest_date,ticker' }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('gex_snapshots').upsert(
+        {
+          snapshot_date: dateStr,
+          ticker,
+          underlying_price: chain.underlyingPrice,
+          net_gex: gexData.netGex,
+          abs_gex: gexData.absGex,
+          zero_gamma: gexData.zeroGamma,
+          call_wall: gexData.callWall,
+          put_wall: gexData.putWall,
+          regime: gexData.regime,
+          gex_by_strike: gexData.byStrike as unknown as Json,
+          put_call_ratio: gexData.putCallRatio,
+          iv_skew: gexData.ivSkew,
+        },
+        { onConflict: 'snapshot_date,ticker' }
       )
 
       processed.push(ticker)

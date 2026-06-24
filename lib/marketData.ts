@@ -6,7 +6,7 @@ import type { OptionChainData, ContractData } from '@/types/market'
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
 
-const MAX_EXPIRATIONS = 3
+const MAX_EXPIRATIONS = 6
 
 export async function getOptionChain(ticker: string): Promise<OptionChainData> {
   // Fetch the base options chain — includes expirationDates and the underlying quote
