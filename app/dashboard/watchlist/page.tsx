@@ -56,14 +56,14 @@ export default function WatchlistPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: 13, color: 'var(--text-3)' }}>Loading…</span>
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100dvh' }}>
       {/* Header */}
       <header style={{ borderBottom: '1px solid var(--border)', padding: '16px 24px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -144,13 +144,7 @@ export default function WatchlistPage() {
                 </span>
                 <button
                   onClick={() => removeTicker(item.id)}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontSize: 12, color: 'var(--text-3)', padding: '4px 8px',
-                    borderRadius: 4, transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--red)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-3)')}
+                  className="btn-remove"
                 >
                   Remove
                 </button>

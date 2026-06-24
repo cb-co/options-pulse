@@ -30,7 +30,7 @@ function heatStyles(heat: ReturnType<typeof scoreHeat>, isCompact: boolean) {
     borderRadius: 8,
     position: 'relative' as const,
     overflow: 'hidden' as const,
-    transition: 'border-color 0.2s, box-shadow 0.2s',
+    transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s ease',
   }
   switch (heat) {
     case 'fire': return {
@@ -97,7 +97,7 @@ export function DigestCard({ ticker, score, narrative, signals, size = 'default'
   const scoreStyle = score != null ? scoreGlowStyle(heat, scoreFontSize(score, size)) : {}
 
   return (
-    <div style={cardStyle}>
+    <div style={cardStyle} className="digest-card">
       {/* Rank badge */}
       {rank != null && rank <= 3 && (
         <div

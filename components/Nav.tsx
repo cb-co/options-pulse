@@ -54,7 +54,7 @@ export async function Nav({ active }: { active?: 'movers' | 'dashboard' }) {
           />
           <span
             style={{
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontFamily: 'var(--font-space), system-ui, sans-serif',
               fontWeight: 700,
               fontSize: 16,
               color: 'var(--text-1)',
@@ -69,31 +69,13 @@ export async function Nav({ active }: { active?: 'movers' | 'dashboard' }) {
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Link
             href="/movers"
-            style={{
-              fontSize: 13,
-              fontWeight: 500,
-              padding: '6px 12px',
-              borderRadius: 6,
-              textDecoration: 'none',
-              color: active === 'movers' ? 'var(--text-1)' : 'var(--text-2)',
-              background: active === 'movers' ? 'var(--surface-3)' : 'transparent',
-              transition: 'color 0.15s',
-            }}
+            className={`nav-link${active === 'movers' ? ' nav-link-active' : ''}`}
           >
-            Top Movers
+            Top movers
           </Link>
           <Link
             href="/dashboard"
-            style={{
-              fontSize: 13,
-              fontWeight: 500,
-              padding: '6px 12px',
-              borderRadius: 6,
-              textDecoration: 'none',
-              color: active === 'dashboard' ? 'var(--text-1)' : 'var(--text-2)',
-              background: active === 'dashboard' ? 'var(--surface-3)' : 'transparent',
-              transition: 'color 0.15s',
-            }}
+            className={`nav-link${active === 'dashboard' ? ' nav-link-active' : ''}`}
           >
             Dashboard
           </Link>
@@ -101,23 +83,10 @@ export async function Nav({ active }: { active?: 'movers' | 'dashboard' }) {
 
         {/* Auth */}
         {user && initial ? (
-          <Link
-            href="/account"
-            title={user.email}
-            style={{
-              width: 32, height: 32,
-              borderRadius: '50%',
-              background: 'var(--surface-3)',
-              border: '1px solid var(--border-2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              textDecoration: 'none',
-              flexShrink: 0,
-              transition: 'border-color 0.15s',
-            }}
-          >
+          <Link href="/account" className="nav-avatar" title={user.email}>
             <span
               style={{
-                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                fontFamily: 'var(--font-space), system-ui, sans-serif',
                 fontWeight: 700,
                 fontSize: 13,
                 color: 'var(--amber)',
@@ -128,20 +97,7 @@ export async function Nav({ active }: { active?: 'movers' | 'dashboard' }) {
             </span>
           </Link>
         ) : (
-          <Link
-            href="/login"
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              padding: '6px 14px',
-              borderRadius: 6,
-              border: '1px solid var(--border-2)',
-              color: 'var(--text-2)',
-              textDecoration: 'none',
-              transition: 'color 0.15s, border-color 0.15s',
-              flexShrink: 0,
-            }}
-          >
+          <Link href="/login" className="nav-sign-in">
             Sign in
           </Link>
         )}

@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   if (sent) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center', maxWidth: 360 }}>
           <div
             style={{
@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       {/* Minimal header */}
       <header style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
         <Link
