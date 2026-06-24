@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/daily-digest",
+      "path": "/api/cron/gex-snapshot",
       "schedule": "0 21 * * 1-5"
     }
   ]

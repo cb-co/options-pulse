@@ -15,7 +15,7 @@ npx supabase gen types typescript --local > types/supabase.ts  # Regenerate DB t
 
 Testing the cron job locally:
 ```bash
-curl -X POST http://localhost:3000/api/cron/daily-digest \
+curl -X POST http://localhost:3000/api/cron/gex-snapshot \
   -H "Authorization: Bearer <CRON_SECRET value>"
 ```
 
@@ -37,22 +37,22 @@ curl -X POST http://localhost:3000/api/cron/daily-digest \
 
 ### Database access pattern
 
-- **Anon role** (client-side Supabase client): used for public reads of `option_snapshots` and `digests`. RLS allows anon reads on these tables.
+- **Anon role** (client-side Supabase client): used for public reads of `option_snapshots` and `gex_snapshots`. RLS allows anon reads on these tables.
 - **Service role** (server-side, never exposed to browser): used by the cron job API route for all writes. Import via `createClient(url, SUPABASE_SERVICE_ROLE_KEY)`.
 - `profiles` and `watchlist_items`: user can only access their own rows (RLS by `auth.uid()`).
 
 ### Data pipeline flow (daily cron)
 
-`/api/cron/daily-digest` runs this sequence:
+`/api/cron/gex-snapshot` runs this sequence:
 1. Build ticker list = 18 fixed universe tickers ∪ distinct tickers from `watchlist_items`
-2. For each ticker: `getOptionChain()` → store contracts in `option_snapshots` → compute signals → call Claude for narrative → upsert into `digests`
-3. Add 300–500ms delay between ticker fetches; catch per-ticker errors and skip rather than aborting the whole job
-4. Protect endpoint by checking `x-cron-secret` header matches `CRON_SECRET` env var
+2. For each ticker: `getOptionChain()` → store contracts in `option_snapshots` → `computeGex()` → upsert into `gex_snapshots`
+3. Add ~400ms delay between ticker fetches; catch per-ticker errors and skip rather than aborting the whole job
+4. Protect endpoint by checking `Authorization: Bearer <CRON_SECRET>` header
 
-**Signal computation** (see brief Section 5 for full detail):
-- Day-1 always: `put_call_ratio`, `vol_oi_ratio` (top 3 contracts), `iv_skew`
-- Day-2+: `volume_change`, `oi_change`, `iv_change` vs. yesterday's snapshot
-- Unusualness score = `max(vol_oi_ratio) + abs(put_call_ratio - 0.7) * 2 + max(abs(iv_change)) * 5`
+**GEX computation** (see `lib/gex.ts`):
+- Black-Scholes gamma per contract: `d1 = [ln(S/K) + (r + σ²/2)·T] / (σ·√T)`, `Γ = φ(d1) / (S·σ·√T)`
+- Strike-level GEX: calls positive, puts negative, multiplied by OI × 100 × S²
+- Aggregate outputs: `net_gex`, `abs_gex`, `regime`, `call_wall`, `put_wall`, `zero_gamma`, `put_call_ratio`, `iv_skew`
 
 ### Fixed ticker universe
 
@@ -64,16 +64,6 @@ export const FIXED_UNIVERSE = [
 ]
 ```
 
-### AI narrative generation (`lib/ai.ts`)
-
-The AI layer is model-agnostic via the Vercel AI SDK (`ai` package). Provider and model are controlled entirely by env vars — no code changes needed to swap:
-- Set `AI_PROVIDER=anthropic|openai|google` and `AI_MODEL=<any valid model ID>`
-- Provider SDKs: `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google`
-- Each provider reads its API key from its standard env var automatically
-- `generateNarrative(ticker, signals)` in `lib/ai.ts` is the single call site
-- System prompt constrains to factual, neutral, 2-3 sentence summaries — no buy/sell recommendations
-- Store result in `digests.narrative` — generate once per ticker per day, not per request
-
 ### Stripe integration
 
 - One product, one price: `STRIPE_PRICE_ID` env var (set in Stripe dashboard)
@@ -82,14 +72,14 @@ The AI layer is model-agnostic via the Vercel AI SDK (`ai` package). Provider an
 
 ### Cron schedule
 
-Vercel Cron config in `vercel.json`: `"0 21 * * 1-5"` (21:00 UTC, weekdays only — ~4pm ET in summer, ~4:30pm ET in winter, acceptable for EOD digest).
+Vercel Cron config in `vercel.json`: `"0 21 * * 1-5"` (21:00 UTC, weekdays only — ~4pm ET in summer, ~4:30pm ET in winter, runs after market close to capture final OI).
 
 ## Key conventions
 
-- **Legal disclaimer** must appear in the footer and near every digest display: *"OptionPulse summarizes publicly observable options market activity for informational and educational purposes only. Nothing here is investment advice or a recommendation to buy or sell any security."*
-- Flatten option chains to **next ~3 expirations** only — don't store the full chain
-- `digests` table uses `upsert` on `(digest_date, ticker)` unique constraint — safe to re-run the cron job
-- `/movers` shows top results ordered by `unusualness_score desc` — no auth required
+- **Legal disclaimer** must appear in the footer and near every GEX display: *"OptionPulse computes Gamma Exposure (GEX) from publicly available options data for informational and educational purposes only. GEX is a derived metric, not a forecast. Nothing here is investment advice or a recommendation to buy or sell any security."*
+- Flatten option chains to **next 6 expirations** (0DTE + weekly + monthly coverage)
+- `gex_snapshots` table uses `upsert` on `(snapshot_date, ticker)` unique constraint — safe to re-run the cron
+- `/movers` shows all tickers ordered by `abs_gex desc` — no auth required
 
 ## Environment Variables
 
@@ -98,12 +88,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
-# AI — swap provider and model without touching code
-AI_PROVIDER=anthropic           # anthropic | openai | google
-AI_MODEL=claude-sonnet-4-6      # any model ID valid for the chosen provider
-ANTHROPIC_API_KEY=              # required if AI_PROVIDER=anthropic
-OPENAI_API_KEY=                 # required if AI_PROVIDER=openai
-GOOGLE_GENERATIVE_AI_API_KEY=   # required if AI_PROVIDER=google
+GEX_RISK_FREE_RATE=0.05         # US 3-month T-bill rate for Black-Scholes gamma
 
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
