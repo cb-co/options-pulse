@@ -16,7 +16,7 @@ npx supabase gen types typescript --local > types/supabase.ts  # Regenerate DB t
 Testing the cron job locally:
 ```bash
 curl -X POST http://localhost:3000/api/cron/daily-digest \
-  -H "x-cron-secret: <CRON_SECRET value>"
+  -H "Authorization: Bearer <CRON_SECRET value>"
 ```
 
 ## Architecture
