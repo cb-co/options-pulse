@@ -38,6 +38,23 @@ export interface GexByStrike {
   netGex: number
 }
 
+export interface GexByExpiry {
+  expiry: string
+  gex: GexData
+}
+
+export interface SerializedContractData {
+  symbol: string
+  expiration: string
+  strike: number
+  optionType: 'call' | 'put'
+  volume: number | null
+  openInterest: number | null
+  impliedVolatility: number | null
+  lastPrice: number | null
+  underlyingPrice: number
+}
+
 export interface GexData {
   ticker: string
   underlyingPrice: number

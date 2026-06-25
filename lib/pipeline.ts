@@ -68,6 +68,7 @@ export async function runDailyPipeline(
           gex_by_strike: gexData.byStrike as unknown as Json,
           put_call_ratio: gexData.putCallRatio,
           iv_skew: gexData.ivSkew,
+          snapshot_ts: date.toISOString(),  // updated on every run, not just first insert
         },
         { onConflict: 'snapshot_date,ticker' }
       )

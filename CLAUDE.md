@@ -88,7 +88,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
-GEX_RISK_FREE_RATE=0.05         # US 3-month T-bill rate for Black-Scholes gamma
+NEXT_PUBLIC_GEX_RISK_FREE_RATE=0.05   # US 3-month T-bill rate for Black-Scholes gamma (NEXT_PUBLIC so client and server use the same value)
 
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
