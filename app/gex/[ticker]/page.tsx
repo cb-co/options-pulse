@@ -1,4 +1,6 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Nav } from '@/components/Nav'
@@ -74,7 +76,7 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
         </div>
 
         {/* Stat grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 1, marginBottom: 32, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 1, marginBottom: 32, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           {stats.map(s => (
             <div key={s.label} style={{ padding: '14px 18px', background: 'var(--surface)' }}>
               <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{s.label}</div>
@@ -129,7 +131,7 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
               <div style={{ marginTop: 32 }}>
                 <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600, marginBottom: 12 }}>Strike breakdown</div>
                 <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', padding: '10px 16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', padding: '10px 16px' }}>
                     {['Strike', 'Call GEX', 'Put GEX', 'Net GEX'].map(h => (
                       <div key={h} style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)' }}>{h}</div>
                     ))}
@@ -139,7 +141,7 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
                     .sort((a, b) => Math.abs(b.netGex) - Math.abs(a.netGex))
                     .slice(0, 20)
                     .map((s, i) => (
-                      <div key={s.strike} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', padding: '10px 16px', background: i % 2 ? 'transparent' : 'rgba(255,255,255,0.01)', borderBottom: i < 19 ? '1px solid var(--border)' : 'none' }}>
+                      <div key={s.strike} style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', padding: '10px 16px', background: i % 2 ? 'transparent' : 'rgba(255,255,255,0.01)', borderBottom: i < 19 ? '1px solid var(--border)' : 'none' }}>
                         <div className="font-mono" style={{ fontSize: 12, color: 'var(--text-2)' }}>${s.strike}</div>
                         <div className="font-mono" style={{ fontSize: 12, color: 'var(--green)' }}>{fmtGex(s.callGex)}</div>
                         <div className="font-mono" style={{ fontSize: 12, color: 'var(--red)' }}>{fmtGex(s.putGex)}</div>
