@@ -36,7 +36,7 @@ function computeZeroGamma(contracts: ContractData[], spotPrice: number, asOf: Da
     for (const c of eligible) {
       const T = timeToExpiryYears(c.expiration, asOf)
       const gamma = blackScholesGamma(S, c.strike, T, c.impliedVolatility!)
-      const gex = gamma * c.openInterest! * CONTRACT_MULTIPLIER * S * S
+      const gex = gamma * c.openInterest! * CONTRACT_MULTIPLIER * S * S * 0.01
       netGex += c.optionType === 'call' ? gex : -gex
     }
     profile.push({ price: S, netGex })
@@ -67,7 +67,7 @@ export function computeGex(
     if (T <= 0) continue
 
     const gamma = blackScholesGamma(underlyingPrice, c.strike, T, c.impliedVolatility)
-    const gex = gamma * c.openInterest * CONTRACT_MULTIPLIER * underlyingPrice * underlyingPrice
+    const gex = gamma * c.openInterest * CONTRACT_MULTIPLIER * underlyingPrice * underlyingPrice * 0.01
     const entry = byStrikeMap.get(c.strike) ?? { callGex: 0, putGex: 0 }
     if (c.optionType === 'call') entry.callGex += gex
     else entry.putGex -= gex
