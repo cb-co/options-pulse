@@ -6,7 +6,9 @@ import { createClient } from '@/lib/supabase/server'
 import { Nav } from '@/components/Nav'
 import { Disclaimer } from '@/components/Disclaimer'
 import { GexExpiryControls } from '@/components/GexExpiryControls'
+import { computeGexHistoryContext } from '@/lib/gexHistory'
 import type { SerializedContractData } from '@/types/market'
+import type { GexHistorySnapshot } from '@/lib/gexHistory'
 
 const FREE_TICKERS = new Set(['SPY', 'QQQ', 'IWM'])
 
@@ -58,6 +60,33 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
     }
   }
 
+  // Fetch trailing 60-session history for trend chart and own-history percentile.
+  // Ordered DESC so computeGexHistoryContext gets newest-first; chart reverses to ASC.
+  const { data: historyRows } = await db
+    .from('gex_snapshots')
+    .select('snapshot_date, net_gex, abs_gex, call_wall, put_wall, zero_gamma, underlying_price, put_call_ratio, iv_skew, methodology')
+    .eq('ticker', ticker)
+    .order('snapshot_date', { ascending: false })
+    .limit(60)
+
+  const historySnapshots: GexHistorySnapshot[] = (historyRows ?? []).map((r: Record<string, unknown>) => ({
+    snapshot_date: r.snapshot_date as string,
+    net_gex: Number(r.net_gex),
+    abs_gex: Number(r.abs_gex),
+    call_wall: r.call_wall != null ? Number(r.call_wall) : null,
+    put_wall: r.put_wall != null ? Number(r.put_wall) : null,
+    zero_gamma: r.zero_gamma != null ? Number(r.zero_gamma) : null,
+    underlying_price: Number(r.underlying_price),
+    put_call_ratio: r.put_call_ratio != null ? Number(r.put_call_ratio) : null,
+    iv_skew: r.iv_skew != null ? Number(r.iv_skew) : null,
+    methodology: r.methodology as GexHistorySnapshot['methodology'],
+  }))
+
+  // Pre-compute context server-side so the client doesn't need to re-derive it
+  const historyContext = snap
+    ? computeGexHistoryContext(historySnapshots, Number(snap.net_gex))
+    : null
+
   return (
     <>
       <Nav />
@@ -91,6 +120,8 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
             serializedContracts={serializedContracts}
             underlyingPrice={Number(snap.underlying_price)}
             initialRegime={snap.regime as 'positive' | 'negative'}
+            historySnapshots={historySnapshots}
+            historyContext={historyContext}
           />
         )}
 

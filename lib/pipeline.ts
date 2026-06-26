@@ -2,6 +2,7 @@ import { getOptionChain } from '@/lib/marketData'
 import { computeGex } from '@/lib/gex'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FIXED_UNIVERSE } from '@/constants/tickers'
+import { CANONICAL_METHODOLOGY } from '@/lib/gexHistory'
 import type { Json } from '@/types/supabase'
 
 const DELAY_MS = process.env.NODE_ENV === 'test' ? 0 : 400
@@ -69,6 +70,7 @@ export async function runDailyPipeline(
           put_call_ratio: gexData.putCallRatio,
           iv_skew: gexData.ivSkew,
           snapshot_ts: date.toISOString(),  // updated on every run, not just first insert
+          methodology: CANONICAL_METHODOLOGY as unknown as Json,
         },
         { onConflict: 'snapshot_date,ticker' }
       )

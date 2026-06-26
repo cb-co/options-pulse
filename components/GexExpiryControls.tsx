@@ -11,7 +11,9 @@ import {
   filterContractsByExpirations,
 } from '@/lib/gex'
 import type { GexByExpiry, SerializedContractData } from '@/types/market'
+import type { GexHistoryContext, GexHistorySnapshot } from '@/lib/gexHistory'
 import { GexChart } from '@/components/GexChart'
+import { GexTrendChart } from '@/components/GexTrendChart'
 import { RegimePanel } from '@/components/RegimePanel'
 import { CharmVannaPanel } from '@/components/CharmVannaPanel'
 
@@ -22,6 +24,24 @@ type Props = {
   serializedContracts: SerializedContractData[]
   underlyingPrice: number
   initialRegime: 'positive' | 'negative'
+  historySnapshots: GexHistorySnapshot[]
+  historyContext: GexHistoryContext | null
+}
+
+const BAND_LABEL: Record<string, string> = {
+  depressed: 'depressed',
+  'below-normal': 'below normal',
+  normal: 'normal',
+  elevated: 'elevated',
+  extreme: 'extreme',
+}
+
+const BAND_COLOR: Record<string, string> = {
+  depressed: 'var(--red)',
+  'below-normal': 'var(--text-2)',
+  normal: 'var(--text-2)',
+  elevated: 'var(--green)',
+  extreme: 'var(--green)',
 }
 
 const EXPIRY_OPTIONS = [1, 2, 4, 6] as const
@@ -51,6 +71,8 @@ export function GexExpiryControls({
   serializedContracts,
   underlyingPrice,
   initialRegime,
+  historySnapshots,
+  historyContext,
 }: Props) {
   const [nExpiries, setNExpiries] = useState<1 | 2 | 4 | 6>(4)
   const [zeroDteOnly, setZeroDteOnly] = useState(false)
@@ -263,6 +285,19 @@ export function GexExpiryControls({
             <div className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: s.color }}>
               {s.value}
             </div>
+            {s.label === 'Net GEX' && historyContext && (
+              historyContext.sufficientHistory ? (
+                <div style={{ fontSize: 10, color: BAND_COLOR[historyContext.band], marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+                  {Math.round(historyContext.percentile)}th pct · {BAND_LABEL[historyContext.band]}
+                </div>
+              ) : (
+                <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 4 }}>
+                  {historyContext.windowSize > 0
+                    ? `building history (${historyContext.windowSize}/${20} sessions)`
+                    : 'no history yet'}
+                </div>
+              )
+            )}
           </div>
         ))}
       </div>
@@ -308,6 +343,32 @@ export function GexExpiryControls({
           />
         )}
       </div>
+
+      {/* Historical trend */}
+      {historySnapshots.length >= 2 && (() => {
+        // Chart needs ASC order; historySnapshots are DESC from the query
+        const chartSnaps = [...historySnapshots].reverse()
+        return (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600 }}>
+                Net GEX history
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                trailing {historySnapshots.length} sessions · canonical 6-exp full profile · EOD
+              </div>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 8px 8px' }}>
+              <GexTrendChart snapshots={chartSnaps} />
+            </div>
+            {!historyContext?.sufficientHistory && historySnapshots.length > 0 && (
+              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
+                Own-history percentile will appear after {20} sessions of data accumulate. Snapshots build forward from initial deployment — EOD OI history cannot be reconstructed retroactively.
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Supplementary chips */}
       {(gexData.putCallRatio != null || gexData.ivSkew != null) && (

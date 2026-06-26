@@ -92,7 +92,7 @@ export function GexChart({ data, underlyingPrice, callWall, putWall, zeroGamma, 
   const allAbs = data.map(d => Math.abs(d.callGex) + Math.abs(d.putGex))
   const maxAbs = allAbs.length ? Math.max(...allAbs) : 0
   const active = maxAbs > 0
-    ? data.filter(d => Math.abs(d.callGex) + Math.abs(d.putGex) >= maxAbs * 0.005)
+    ? data.filter(d => Math.abs(d.callGex) + Math.abs(d.putGex) >= maxAbs * 0.02)
     : data
 
   let lo: number
