@@ -5,11 +5,15 @@ import {
   computeGex,
   computeGexByExpiry,
   computeVolTrigger,
+  computeWallGeometry,
+  computeGexBalance,
   computeCharm,
   computeVanna,
   getDistinctExpirations,
   filterContractsByExpirations,
 } from '@/lib/gex'
+import { runSignalEngine, LEVERAGED_ETFS } from '@/lib/gexSignals'
+import { SignalsSection } from '@/components/SignalsSection'
 import type { GexByExpiry, SerializedContractData } from '@/types/market'
 import type { GexHistoryContext, GexHistorySnapshot } from '@/lib/gexHistory'
 import { GexChart } from '@/components/GexChart'
@@ -141,6 +145,26 @@ export function GexExpiryControls({
   const vannaData = useMemo(
     () => computeVanna(selectedContracts, underlyingPrice, asOf),
     [selectedContracts, underlyingPrice, asOf]
+  )
+
+  const signalOutput = useMemo(
+    () => runSignalEngine({
+      ticker,
+      spot: underlyingPrice,
+      netGex: gexData.netGex,
+      absGex: gexData.absGex,
+      callWall: gexData.callWall,
+      putWall: gexData.putWall,
+      zeroGamma: gexData.zeroGamma,
+      volTrigger,
+      gexRegime: gexData.regime,
+      wallGeometry: computeWallGeometry(gexData.callWall, gexData.putWall, underlyingPrice),
+      gexBalance: computeGexBalance(gexData.netGex, gexData.absGex),
+      historyContext: historyContext ?? null,
+      snapshotTs,
+      isLeveraged: LEVERAGED_ETFS.has(ticker),
+    }),
+    [ticker, underlyingPrice, gexData, volTrigger, historyContext, snapshotTs]
   )
 
   const stats = [
@@ -304,6 +328,11 @@ export function GexExpiryControls({
 
       {/* Regime panel */}
       <RegimePanel gexData={gexData} spotPrice={underlyingPrice} volTrigger={volTrigger} />
+
+      {/* Structural signal engine */}
+      <div style={{ marginTop: 16, marginBottom: 16 }}>
+        <SignalsSection output={signalOutput} />
+      </div>
 
       {zeroDteOnly && (
         <div style={{ marginTop: -16, marginBottom: 16, fontSize: 11, color: 'var(--text-3)' }}>
