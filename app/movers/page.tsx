@@ -6,19 +6,28 @@ export const revalidate = 3600
 
 export default async function MoversPage() {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+
+  // Look back far enough to bridge weekends/holidays/a missed cron run — each
+  // ticker's most recent row within the window wins, not an exact "today" match.
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 14)
+  const cutoffStr = cutoff.toISOString().split('T')[0]
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
   const { data: snapshots } = await db
     .from('gex_snapshots')
-    .select('ticker, net_gex, abs_gex, regime, call_wall, put_wall, underlying_price')
-    .eq('snapshot_date', today)
-    .order('abs_gex', { ascending: false })
+    .select('ticker, snapshot_date, net_gex, abs_gex, regime, call_wall, put_wall, underlying_price')
+    .gte('snapshot_date', cutoffStr)
+    .order('snapshot_date', { ascending: false })
 
+  type GexSnap = { ticker: string; snapshot_date: string; net_gex: number | null; abs_gex: number | null; regime: string | null; call_wall: number | null; put_wall: number | null; underlying_price: number | null }
+  const latestByTicker = new Map<string, GexSnap>()
+  for (const s of (snapshots ?? []) as GexSnap[]) {
+    if (!latestByTicker.has(s.ticker)) latestByTicker.set(s.ticker, s)
+  }
+  const rows = [...latestByTicker.values()].sort((a, b) => (b.abs_gex ?? 0) - (a.abs_gex ?? 0))
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  type GexSnap = { ticker: string; net_gex: number | null; abs_gex: number | null; regime: string | null; call_wall: number | null; put_wall: number | null; underlying_price: number | null }
-  const rows = (snapshots ?? []) as GexSnap[]
 
   return (
     <>
@@ -33,8 +42,8 @@ export default async function MoversPage() {
 
         {!rows.length ? (
           <div style={{ padding: '48px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', textAlign: 'center' }}>
-            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>Today&apos;s GEX data hasn&apos;t been computed yet.</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>Check back after market close on weekdays.</div>
+            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>No recent GEX data available.</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>Data is computed each weekday morning before market open.</div>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>

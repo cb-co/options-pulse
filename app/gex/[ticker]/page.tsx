@@ -26,16 +26,18 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
     if (profile?.subscription_status !== 'active') redirect('/pricing')
   }
 
-  const today = new Date().toISOString().split('T')[0]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
 
+  // Most recent snapshot for this ticker, not an exact "today" match — bridges
+  // weekends/holidays/a missed cron run instead of showing nothing.
   const { data: snap } = await db
     .from('gex_snapshots')
     .select('*')
-    .eq('snapshot_date', today)
     .eq('ticker', ticker)
-    .single()
+    .order('snapshot_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   // Fetch raw contracts so the client can recompute for any expiry window
   let serializedContracts: SerializedContractData[] = []
@@ -43,7 +45,7 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
     const { data: contractRows } = await db
       .from('option_snapshots')
       .select('contract_symbol, expiration, strike, option_type, volume, open_interest, implied_volatility, last_price')
-      .eq('snapshot_date', today)
+      .eq('snapshot_date', snap.snapshot_date)
       .eq('ticker', ticker)
     if (contractRows) {
       serializedContracts = (contractRows as Array<Record<string, unknown>>).map(r => ({
@@ -101,7 +103,9 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
               </h1>
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-3)', margin: 0 }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              {snap
+                ? new Date(snap.snapshot_date + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' })
+                : new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
           </div>
           <Link href="/movers" style={{ fontSize: 13, color: 'var(--text-3)', textDecoration: 'none' }}>← All tickers</Link>
@@ -109,14 +113,14 @@ export default async function GexPage({ params }: { params: Promise<{ ticker: st
 
         {!snap ? (
           <div style={{ padding: '48px 32px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', textAlign: 'center' }}>
-            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>No GEX data for {ticker} today.</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>Data is computed after market close on weekdays.</div>
+            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>No recent GEX data for {ticker}.</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>Data is computed each weekday morning before market open.</div>
           </div>
         ) : (
           <GexExpiryControls
             ticker={ticker}
-            snapshotDate={today}
-            snapshotTs={snap.snapshot_ts ?? snap.created_at ?? (today + 'T21:00:00Z')}
+            snapshotDate={snap.snapshot_date}
+            snapshotTs={snap.snapshot_ts ?? snap.created_at ?? (snap.snapshot_date + 'T12:00:00Z')}
             serializedContracts={serializedContracts}
             underlyingPrice={Number(snap.underlying_price)}
             initialRegime={snap.regime as 'positive' | 'negative'}

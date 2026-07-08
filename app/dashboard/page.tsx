@@ -19,25 +19,34 @@ export default async function DashboardPage() {
 
   const subscriptionStatus = profile?.subscription_status ?? 'free'
   const isPaid = subscriptionStatus === 'active'
-  const today = new Date().toISOString().split('T')[0]
 
   const { data: watchlistItems } = await supabase
     .from('watchlist_items').select('ticker').order('created_at', { ascending: true })
 
   const tickers = (watchlistItems ?? []).map((w: { ticker: string }) => w.ticker)
 
+  // Look back far enough to bridge weekends/holidays/a missed cron run — each
+  // ticker's most recent row within the window wins, not an exact "today" match.
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 14)
+  const cutoffStr = cutoff.toISOString().split('T')[0]
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
   const { data: snapshots } = tickers.length
     ? await db
         .from('gex_snapshots')
-        .select('ticker, net_gex, abs_gex, regime, call_wall, put_wall, underlying_price')
-        .eq('snapshot_date', today)
+        .select('ticker, snapshot_date, net_gex, abs_gex, regime, call_wall, put_wall, underlying_price')
         .in('ticker', tickers)
+        .gte('snapshot_date', cutoffStr)
+        .order('snapshot_date', { ascending: false })
     : { data: [] }
 
-  type GexSnap = { ticker: string; net_gex: number | null; abs_gex: number | null; regime: string | null; call_wall: number | null; put_wall: number | null; underlying_price: number | null }
-  const snapshotMap = new Map(((snapshots ?? []) as GexSnap[]).map(s => [s.ticker, s]))
+  type GexSnap = { ticker: string; snapshot_date: string; net_gex: number | null; abs_gex: number | null; regime: string | null; call_wall: number | null; put_wall: number | null; underlying_price: number | null }
+  const snapshotMap = new Map<string, GexSnap>()
+  for (const s of (snapshots ?? []) as GexSnap[]) {
+    if (!snapshotMap.has(s.ticker)) snapshotMap.set(s.ticker, s)
+  }
 
   return (
     <>

@@ -72,13 +72,14 @@ export const FIXED_UNIVERSE = [
 
 ### Cron schedule
 
-Vercel Cron config in `vercel.json`: `"0 21 * * 1-5"` (21:00 UTC, weekdays only — ~4pm ET in summer, ~4:30pm ET in winter, runs after market close to capture final OI).
+Vercel Cron config in `vercel.json`: `"0 12 * * 1-5"` (12:00 UTC, weekdays only — ~7am ET in winter, ~8am ET in summer). Runs pre-market, after open interest has settled overnight, using the prior session's closing price — this keeps price and OI from the same session and publishes levels before the session they're meant to describe, rather than after it.
 
 ## Key conventions
 
 - **Legal disclaimer** must appear in the footer and near every GEX display: *"OptionPulse computes Gamma Exposure (GEX) from publicly available options data for informational and educational purposes only. GEX is a derived metric, not a forecast. Nothing here is investment advice or a recommendation to buy or sell any security."*
 - Flatten option chains to **next 6 expirations** (0DTE + weekly + monthly coverage)
 - `gex_snapshots` table uses `upsert` on `(snapshot_date, ticker)` unique constraint — safe to re-run the cron
+- Reads of `gex_snapshots` (dashboard, movers, `/gex/[ticker]`) fetch the **most recent available** snapshot per ticker, not an exact match on today's date — a snapshot stays visible through the full session until the next morning's run supersedes it
 - `/movers` shows all tickers ordered by `abs_gex desc` — no auth required
 
 ## Environment Variables

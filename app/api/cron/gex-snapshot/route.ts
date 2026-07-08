@@ -1,4 +1,4 @@
-// app/api/cron/daily-digest/route.ts
+// app/api/cron/gex-snapshot/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { runDailyPipeline } from '@/lib/pipeline'
 
